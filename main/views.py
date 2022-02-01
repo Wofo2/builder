@@ -125,7 +125,6 @@ class Activate(APIView):
         code_otp = request.data['otp']
         receiver = User.objects.get(id=user_id)
         receiver.active = True
-        print("ashhu")
         refresh, access = get_tokens_for_user(receiver)
         return Response({'message': 'Successful', 'refresh': refresh, 'access': access})
 
