@@ -5,5 +5,6 @@ from . import views
 urlpatterns = [
     re_path(r'^createcompany/$', views.createCompany.as_view(), name='createCompany'),
 
+
 ]
 

@@ -65,8 +65,6 @@ class FoundingTeam(models.Model):
         return self.name
 
 
-
-
 class OTPs(models.Model):
     """
     Model to store Otp of user And verify user.

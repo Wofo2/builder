@@ -35,7 +35,6 @@ SHARED_APPS = [
 TENANT_APPS = [
     # The following Django contrib apps must be in TENANT_APPS
     'rest_framework',
-    'users',
     'main',
     'tempspace',
     'django.contrib.contenttypes',
@@ -140,17 +139,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'builder.wsgi.application'
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django_tenants.postgresql_backend',
         'NAME': 'postgres',
         'USER': 'dbmasteruser',
-        'PASSWORD': '4tZ1X[3E|.CYOx.TY;K&#s{OmyX?imRF',
-        'HOST': 'ls-c9c3db175e01afa0ac1d24eadb00f7bb7d004d89.c53n0vmbvp41.ap-south-1.rds.amazonaws.com',
+        'PASSWORD': 'i2[}U&;tN(w)5e%`p2bb8cGIxZx3cxG^',
+        'HOST': 'ls-3b94c23191935ebb8aeee9375db066cf22a0fcea.c53n0vmbvp41.ap-south-1.rds.amazonaws.com',
         'PORT': '5432',
         }
 }
+
+
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django_tenants.postgresql_backend',
+#         'NAME': 'postgres',
+#         'USER': 'dbmasteruser',
+#         'PASSWORD': '4tZ1X[3E|.CYOx.TY;K&#s{OmyX?imRF',
+#         'HOST': 'ls-c9c3db175e01afa0ac1d24eadb00f7bb7d004d89.c53n0vmbvp41.ap-south-1.rds.amazonaws.com',
+#         'PORT': '5432',
+#         }
+# }
 
 DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',

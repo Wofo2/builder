@@ -21,8 +21,10 @@ def sendotp(user):
         otp = OTP.objects.filter(receiver=user)
     except(TypeError, ValueError, OverflowError, OTP.DoesNotExist):
         otp = None
+
     if otp is not None:
         otp.delete()
+
     # otp = randint(1000, 9999)
     otp = 9996
     data = OTP.objects.create(otp=otp, receiver=user)

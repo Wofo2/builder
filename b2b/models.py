@@ -25,3 +25,14 @@ class Company(TenantMixin):
 
 class Domain(DomainMixin):
     pass
+
+
+
+templatesx = (
+    ('index.html', 'index.html'),
+    ('index1.html', 'index1.html')
+)
+
+class CompanyTemplate(models.Model):
+    company = models.OneToOneField(Company, on_delete=models.CASCADE, related_name='company_template')
+    rendertemp = models.CharField(choices=templatesx, null=True, blank=True, max_length=20)

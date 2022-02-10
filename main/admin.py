@@ -52,6 +52,7 @@ admin.site.register(Professionals, ProfessionalsAdmin)
 admin.site.register(ServiceOrder,ServiceOrderAdmin)
 admin.site.register(ValueOption, ValueOptionAdmin)
 
+
 admin.site.register(CompanyDetails)
 admin.site.register(CompanyOperation)
 admin.site.register(Paytm)

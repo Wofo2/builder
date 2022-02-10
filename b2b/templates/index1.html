@@ -1,0 +1,49 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>We are 2nd</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" sizes="96x96" href="assets/images/favicon.png">
+
+
+  <link href="https://fonts.googleapis.com/css?family=Poiret+One&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600&display=swap" rel="stylesheet">
+
+  <script>
+    var url=location.href;
+    ashu = url.split('/')
+    console.log(ashu)
+    localStorage.setItem("domain", url+'api/');
+  </script>
+
+  <script src="https://kit.fontawesome.com/1bccd16e01.js"></script>
+  <script type="text/javascript" src="http://yourjavascript.com/4149295198/websocketbridge.js"></script>
+</head>
+<body>
+  <app-root>
+    <img src="{% static 'ang/assets/images/loading.svg' %}" alt="loader"
+    style="position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 150px;
+        height: 150px;
+        transform: translate(-50%,-50%);">
+  </app-root>
+
+  <script src="{% static '2ndang/runtime-es2015.js' %}" type="module"></script>
+  <script src="{% static '2ndang/runtime-es5.js' %}" nomodule defer></script>
+  <script src="{% static '2ndang/polyfills-es5.js' %}" nomodule defer></script>
+  <script src="{% static '2ndang/polyfills-es2015.js' %}" type="module"></script>
+  <script src="{% static '2ndang/styles-es2015.js' %}" type="module"></script>
+  <script src="{% static '2ndang/styles-es5.js' %}" nomodule defer></script>
+  <script src="{% static '2ndang/scripts.js' %}" defer></script>
+  <script src="{% static '2ndang/vendor-es2015.js' %}" type="module"></script>
+  <script src="{% static '2ndang/vendor-es5.js' %}" nomodule defer></script>
+  <script src="{% static '2ndang/main-es2015.js' %}" type="module"></script>
+  <script src="{% static '2ndang/main-es5.js' %}" nomodule defer></script>
+
+</body>
+</html>

@@ -30,6 +30,7 @@ from django.utils.html import strip_tags
 from .notifications import notify
 from django_tenants.utils import remove_www
 from b2b.models import Domain
+from users.views import sendotp
 
 months = {
     '01': 'Jan',
@@ -96,6 +97,7 @@ class CompanyDetailsView(APIView):
 
 
 
+
 class Signup(APIView):
     """
     View for sign up.
@@ -110,26 +112,71 @@ class Signup(APIView):
             phone_number = serializer.validated_data['phone_number']
             name = serializer.validated_data['name']
             user = User.objects.create_user(phone_number=phone_number, name=name)
+            msg_thread = Thread(target=sendotp,args=(user,))
+            msg_thread.start()
             user.save()
             return Response({'info': 'Successfully signed-up', 'user_id': user.id, 'name': name}, status=status.HTTP_201_CREATED)
         raise ValidationError({'error': 'Invalid User'})
 
+#
+# class Activate(APIView):
+#
+#     permission_classes = (permissions.AllowAny,)
+#     serializer_class = OTPSerializer
+#
+#     def post(self, request, user_id,*args,**kwargs):
+#         serializer = OTPSerializer(data=request.data)
+#         code_otp = request.data['otp']
+#         receiver = User.objects.get(id=user_id)
+#         print(receiver, "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppiii")
+#         receiver.active = True
+#         refresh, access = get_tokens_for_user(receiver)
+#         return Response({'message': 'Successful', 'refresh': refresh, 'access': access})
+
 
 class Activate(APIView):
-
+    """
+    Activate verifies the stored otp and the otp entered by user.
+    """
     permission_classes = (permissions.AllowAny,)
     serializer_class = OTPSerializer
 
     def post(self, request, user_id,*args,**kwargs):
         serializer = OTPSerializer(data=request.data)
         code_otp = request.data['otp']
-        receiver = User.objects.get(id=user_id)
-        receiver.active = True
-        refresh, access = get_tokens_for_user(receiver)
-        return Response({'message': 'Successful', 'refresh': refresh, 'access': access})
 
+        print(code_otp, "code_otp code_otp code_otp code_otp code_otp code_otp")
 
+        try:
+            otp = OTP.objects.get(receiver=user_id)
+        except(TypeError, ValueError, OverflowError, OTP.DoesNotExist):
+            otp = None
 
+        print(otp, "saved ottttpppppppppp")
+
+        try:
+            receiver = User.objects.get(id=user_id)
+        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+            receiver = None
+
+        print(receiver, 'requested user.......................')
+
+        if otp is None or receiver is None:
+            raise ValidationError({'error': 'you are not a valid user'})
+        elif timezone.now() - otp.sent_on >= timedelta(days=0, hours=0, minutes=1, seconds=0):
+            # otp.delete()
+            raise ValidationError({'error': 'OTP expired!'})
+
+        if str(otp.otp) == str(code_otp):
+            if receiver.active is False:
+                serializer.is_valid(raise_exception=True)
+                receiver.active = True
+                receiver.save()
+            otp.delete()
+            refresh, access = get_tokens_for_user(receiver)
+            return Response({'message': 'Successful', 'refresh': refresh, 'access': access})
+        else:
+            raise ValidationError({'error': 'Invalid OTP'})
 
 class LoginView(APIView):
     """
@@ -143,6 +190,8 @@ class LoginView(APIView):
         serializer.is_valid(raise_exception=True)
         phone_number = serializer.validated_data['phone_number']
         user = User.objects.get(phone_number=phone_number)
+        msg_thread = Thread(target=sendotp,args=(user,))
+        msg_thread.start()
         return Response({'info': 'successful! Otp sent', 'user_id': user.id, 'name': user.name}, status=status.HTTP_201_CREATED)
 
 
