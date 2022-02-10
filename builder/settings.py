@@ -214,4 +214,4 @@ EMAIL_PORT = 587
 dns_email = "mywofo24@gmail.com"
 dns_api_key = "8915938f255a8f7ddafc3cd744b133dd3b94a"
 dns_domain = "wofo24.com"
-dns_ip_addrees = '15.206.61.82'
+dns_ip_addrees = '3.110.120.1'
