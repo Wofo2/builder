@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import *
 
 
-
+admin.site.register(OTPs)
 
 class CategoryAdmin(admin.ModelAdmin):
     search_fields = ['category']

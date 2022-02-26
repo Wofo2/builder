@@ -69,7 +69,7 @@ class OTPs(models.Model):
     """
     Model to store Otp of user And verify user.
     """
-    receiver = models.OneToOneField(User, on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE)
     otp = models.IntegerField(null=False, blank=False)
     sent_on = models.DateTimeField(auto_now_add=True)
 

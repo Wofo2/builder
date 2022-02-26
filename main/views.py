@@ -5,6 +5,8 @@ from .serializers import *
 from rest_framework.response import Response
 from .permissions import *
 from random import *
+from .utils import sendotps
+import requests
 
 from django.utils import timezone
 from datetime import timedelta
@@ -31,6 +33,9 @@ from .notifications import notify
 from django_tenants.utils import remove_www
 from b2b.models import Domain
 from users.views import sendotp
+from users.models import *
+
+URL = "http://ec2-18-223-119-254.us-east-2.compute.amazonaws.com/otps/activate/"
 
 months = {
     '01': 'Jan',
@@ -112,71 +117,82 @@ class Signup(APIView):
             phone_number = serializer.validated_data['phone_number']
             name = serializer.validated_data['name']
             user = User.objects.create_user(phone_number=phone_number, name=name)
-            msg_thread = Thread(target=sendotp,args=(user,))
+            msg_thread = Thread(target=sendotps,args=(user,))
             msg_thread.start()
             user.save()
             return Response({'info': 'Successfully signed-up', 'user_id': user.id, 'name': name}, status=status.HTTP_201_CREATED)
         raise ValidationError({'error': 'Invalid User'})
 
 #
-# class Activate(APIView):
-#
-#     permission_classes = (permissions.AllowAny,)
-#     serializer_class = OTPSerializer
-#
-#     def post(self, request, user_id,*args,**kwargs):
-#         serializer = OTPSerializer(data=request.data)
-#         code_otp = request.data['otp']
-#         receiver = User.objects.get(id=user_id)
-#         print(receiver, "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppiii")
-#         receiver.active = True
-#         refresh, access = get_tokens_for_user(receiver)
-#         return Response({'message': 'Successful', 'refresh': refresh, 'access': access})
-
-
 class Activate(APIView):
-    """
-    Activate verifies the stored otp and the otp entered by user.
-    """
+
     permission_classes = (permissions.AllowAny,)
     serializer_class = OTPSerializer
 
     def post(self, request, user_id,*args,**kwargs):
         serializer = OTPSerializer(data=request.data)
         code_otp = request.data['otp']
+        receiver = User.objects.get(id=user_id)
 
-        print(code_otp, "code_otp code_otp code_otp code_otp code_otp code_otp")
+        PARAMS = {'otp': code_otp}
+        r = requests.request("POST", url=URL+str(receiver.phone_number)+'/', data=PARAMS)
 
-        try:
-            otp = OTP.objects.get(receiver=user_id)
-        except(TypeError, ValueError, OverflowError, OTP.DoesNotExist):
-            otp = None
-
-        print(otp, "saved ottttpppppppppp")
-
-        try:
-            receiver = User.objects.get(id=user_id)
-        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-            receiver = None
-
-        print(receiver, 'requested user.......................')
-
-        if otp is None or receiver is None:
-            raise ValidationError({'error': 'you are not a valid user'})
-        elif timezone.now() - otp.sent_on >= timedelta(days=0, hours=0, minutes=1, seconds=0):
-            # otp.delete()
-            raise ValidationError({'error': 'OTP expired!'})
-
-        if str(otp.otp) == str(code_otp):
-            if receiver.active is False:
-                serializer.is_valid(raise_exception=True)
-                receiver.active = True
-                receiver.save()
-            otp.delete()
+        if r.status_code == 200:
+            receiver.active = True
+            receiver.save()
             refresh, access = get_tokens_for_user(receiver)
             return Response({'message': 'Successful', 'refresh': refresh, 'access': access})
         else:
-            raise ValidationError({'error': 'Invalid OTP'})
+            return Response({'message': 'Problem'})
+
+
+
+
+
+# class Activate(APIView):
+#     """
+#     Activate verifies the stored otp and the otp entered by user.
+#     """
+#     permission_classes = (permissions.AllowAny,)
+#     serializer_class = OTPSerializer
+#
+#     def post(self, request, user_id,*args,**kwargs):
+#
+#         serializer = OTPSerializer(data=request.data)
+#         code_otp = request.data['otp']
+#
+#         print(code_otp, "code_otp code_otp code_otp code_otp code_otp code_otp")
+#
+#         try:
+#             otp = OTP.objects.get(receiver=user_id)
+#         except(TypeError, ValueError, OverflowError, OTP.DoesNotExist):
+#             otp = None
+#
+#         print(otp, "saved ottttpppppppppp")
+#
+#         try:
+#             receiver = User.objects.get(id=user_id)
+#         except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+#             receiver = None
+#
+#         print(receiver, 'requested user.......................')
+#
+#         if otp is None or receiver is None:
+#             raise ValidationError({'error': 'you are not a valid user'})
+#         elif timezone.now() - otp.sent_on >= timedelta(days=0, hours=0, minutes=1, seconds=0):
+#             # otp.delete()
+#             raise ValidationError({'error': 'OTP expired!'})
+#
+#         if str(otp.otp) == str(code_otp):
+#             if receiver.active is False:
+#                 serializer.is_valid(raise_exception=True)
+#                 receiver.active = True
+#                 receiver.save()
+#             otp.delete()
+#             refresh, access = get_tokens_for_user(receiver)
+#             return Response({'message': 'Successful', 'refresh': refresh, 'access': access})
+#         else:
+#             raise ValidationError({'error': 'Invalid OTP'})
 
 class LoginView(APIView):
     """
@@ -190,7 +206,7 @@ class LoginView(APIView):
         serializer.is_valid(raise_exception=True)
         phone_number = serializer.validated_data['phone_number']
         user = User.objects.get(phone_number=phone_number)
-        msg_thread = Thread(target=sendotp,args=(user,))
+        msg_thread = Thread(target=sendotps,args=(user,))
         msg_thread.start()
         return Response({'info': 'successful! Otp sent', 'user_id': user.id, 'name': user.name}, status=status.HTTP_201_CREATED)
 
@@ -858,5 +874,73 @@ class AdminForgetPasswordView(APIView):
         msg_thread.start()
         return Response({'info': 'successful! Otp sent', 'user_id': user.id, 'name': user.name},
                         status=status.HTTP_201_CREATED)
+
+
+class AdminLoginView(APIView):
+    """
+    Login for admin.
+    """
+
+    serializer_class = AdminLoginSerializer
+    permission_classes = (permissions.AllowAny,)
+
+
+    def post(self, request):
+        serializer = AdminLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        phone_number = serializer.validated_data['phone_number']
+        password = serializer.validated_data['password']
+        user = User.objects.get(phone_number=phone_number)
+        if user.check_password(password):
+            refresh, access = get_tokens_for_user(user)
+            return Response({'message': 'Successful', 'refresh': refresh, 'access': access},
+                            status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+
+class AdminForgetPasswordView(APIView):
+    serializer_class = AdminForgetPasswordSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = AdminForgetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        phone_number = serializer.validated_data['phone_number']
+        user = User.objects.get(phone_number=phone_number, admin=True)
+        msg_thread = Thread(target=sendotps, args=(user,))
+        msg_thread.start()
+        return Response({'info': 'successful! Otp sent', 'user_id': user.id, 'name': user.name},
+                        status=status.HTTP_201_CREATED)
+
+
+class AdminResetPasswordView(APIView):
+    serializer_class = AdminResetPasswordSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, user_id, *args, **kwargs):
+        serializer = AdminResetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        otp = serializer.validated_data['otp']
+        new_password = serializer.validated_data['new_password']
+        try:
+            admin_user_obj = User.objects.get(id=user_id, admin=True)
+        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+            admin_user_obj = None
+
+
+
+
+        if admin_user_obj is None:
+            raise ValidationError({'error': 'you are not a valid user'})
+        else:
+            PARAMS = {'otp': otp}
+            r = requests.request("POST", url=URL + str(admin_user_obj.phone_number) + '/', data=PARAMS)
+
+            if r.status_code == 200:
+                admin_user_obj.set_password(new_password)
+                admin_user_obj.save()
+                return Response({'message': 'Successful', })
+            else:
+                raise ValidationError({'error': 'Invalid OTP'})
 
 

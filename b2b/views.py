@@ -16,6 +16,7 @@ from django.shortcuts import render
 from builder.settings import dns_email, dns_api_key, dns_domain, dns_ip_addrees
 from django_tenants.utils import remove_www
 from django.views.generic import TemplateView
+from .permissions import IsAdminOrReadOnly
 
 User = Founder
 
@@ -39,7 +40,9 @@ class createCompany(APIView):
             tenant.live = True
             tenant.save()
             domain = Domain()
-            domain.domain = schema_name + '.wofo24.com'
+            # domain.domain = schema_name + '.wofo24.com'
+            domain.domain = schema_name + '.'+str(request.get_host())
+
             domain.tenant = tenant
             domain.is_primary = True
             domain.save()
@@ -49,8 +52,17 @@ class createCompany(APIView):
             cf.create_record('A', sub_domain, dns_ip_addrees)
 
 
+
             with schema_context(schema_name):
-                User.objects.create_superuser(phone_number= phone_number, name =username, password=password)
+                try:
+                    user_exist = User.objects.filtter(phone_number = phone_number)
+                except:
+                    user_exist = None
+
+                if user_exist:
+                    user_exist.delete()
+
+                User.objects.create_superuser(phone_number=phone_number, name=username, password=password)
             return Response({'info': 'Successfully signed-up'}, status=status.HTTP_201_CREATED)
         raise ValidationError({'error': 'something bad happens'})
 
@@ -60,6 +72,10 @@ class Home(TemplateView):
     def get(self, request, *args, **kwargs):
         hostname_without_port = remove_www(request.get_host().split(':')[0])
         domain = Domain.objects.get(domain=hostname_without_port)
-        template = domain.tenant.company_template.rendertemp
+        domainN = str(hostname_without_port)
+        if domainN == 'localhost':
+            template = 'landing.html'
+        else:
+            template = domain.tenant.company_template.rendertemp
         return render(request, template )
 

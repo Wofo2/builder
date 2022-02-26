@@ -33,6 +33,9 @@ urlpatterns = [
     re_path(r'^hire_professional/(?P<id>[0-9]+)/$',views.HireProfessionalView.as_view(), name="hire"),
     re_path(r'^applink/$', views.AppLinkView.as_view(), name='app_link'),
     re_path(r'^admin_forget_password/$', views.AdminForgetPasswordView.as_view(), name='admin_forget_password'),
+    re_path(r'^admin_login', views.AdminLoginView.as_view(), name='admin_login'),
+    re_path(r'^admin_forget_password/$', views.AdminForgetPasswordView.as_view(), name='admin_forget_password'),
+    re_path(r'^admin_reset_password/(?P<user_id>[0-9]+)/$', views.AdminResetPasswordView.as_view(), name='admin_reset_password'),
 ]
 # urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
 

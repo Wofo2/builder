@@ -17,7 +17,6 @@ SHARED_APPS = [
 
     'django_tenants',  # mandatory
     'b2b',
-     'users',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -36,8 +35,10 @@ TENANT_APPS = [
     # The following Django contrib apps must be in TENANT_APPS
     'rest_framework',
     'main',
+    'users',
     'tempspace',
     'django.contrib.contenttypes',
+    'django.contrib.auth',
     'django.contrib.admin',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -190,6 +191,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "../static")
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "../media")
 MEDIA_URL = '/media/'
+
+
 
 ASGI_APPLICATION = 'builder.routing.application'
 

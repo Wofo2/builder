@@ -10,13 +10,15 @@ from django_tenants.utils import schema_context
 from .token import get_tokens_for_user
 from threading import Thread
 from random import *
+from main.models import *
 import requests
-
+from django.views.decorators.csrf import csrf_exempt
 
 User = Founder
 
 
 def sendotp(user):
+    print(user, "jjjjjjjjjjjjjjjjjjjjjjjjiiiiii")
     try:
         otp = OTP.objects.filter(receiver=user)
     except(TypeError, ValueError, OverflowError, OTP.DoesNotExist):
@@ -62,7 +64,6 @@ class AdminLoginView(APIView):
                             status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class AdminForgetPasswordView(APIView):
     serializer_class = AdminForgetPasswordSerializer

@@ -77,3 +77,17 @@ class AdminResetPasswordSerializer(serializers.ModelSerializer):
                 raise ValidationError({"error":"Passwords don't match"})
             else:
                 return data
+
+
+class OTPSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OTP
+        fields = ['otp']
+
+    def validate(self, data):
+        otp = data.get('otp')
+        if len(str(otp)) != 4:
+            raise ValidationError({"error":"Invalid OTP"})
+        else:
+            return data
