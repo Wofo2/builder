@@ -73,7 +73,7 @@ class Home(TemplateView):
         hostname_without_port = remove_www(request.get_host().split(':')[0])
         domain = Domain.objects.get(domain=hostname_without_port)
         domainN = str(hostname_without_port)
-        if domainN == 'localhost':
+        if domainN == 'http://ec2-3-18-111-249.us-east-2.compute.amazonaws.com':
             template = 'landing.html'
         else:
             template = domain.tenant.company_template.rendertemp
